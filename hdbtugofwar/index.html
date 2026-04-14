@@ -11,55 +11,65 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
+            margin: 0;
+            min-height: 100vh;
         }
+
+        /* Responsive Home Button */
         .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
+            position: fixed;
+            top: 15px;
+            left: 15px;
             text-decoration: none;
             background: #ffffff;
             color: #2c3e50;
-            padding: 12px 18px;
+            padding: 10px 15px;
             border-radius: 50px;
             font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
             border: 1px solid #eee;
             z-index: 1000;
+            font-size: 0.9em;
         }
         
         .back-btn:hover {
             background: #2c3e50;
             color: #ffffff;
-            transform: translateY(-2px);
         }
+
         #game-container {
-            width: 90%;
+            width: 100%;
             max-width: 900px;
             background: white;
-            padding: 30px;
+            padding: 20px;
+            box-sizing: border-box;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             text-align: center;
+            margin-top: 60px; /* Space for the home button */
         }
 
         /* Tug of War Visuals */
         #tug-area {
             position: relative;
-            height: 120px;
-            margin: 40px 0;
+            min-height: 120px;
+            margin: 30px 0;
             display: flex;
             align-items: center;
+            justify-content: center;
+            flex-wrap: wrap; /* Stack on mobile */
+            gap: 15px;
         }
 
         .team-box {
-            width: 180px;
-            padding: 15px;
+            flex: 0 1 150px;
+            padding: 12px;
             border-radius: 12px;
             font-weight: bold;
             color: white;
-            font-size: 0.9em;
+            font-size: 0.8em;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -68,10 +78,10 @@
         .right-box { background-color: #27ae60; }
 
         #rope-track {
-            flex-grow: 1;
+            flex: 1;
+            min-width: 150px;
             height: 12px;
             background: #dfe6e9;
-            margin: 0 15px;
             position: relative;
             border-radius: 10px;
             border: 2px solid #b2bec3;
@@ -82,33 +92,41 @@
             top: -25px;
             left: 50%;
             transform: translateX(-50%);
-            width: 50px;
-            height: 60px;
+            width: 45px;
+            height: 55px;
             background-color: #e74c3c;
             border-radius: 8px;
-            transition: left 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.6s;
+            transition: left 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             color: white;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-size: 0.8em;
         }
 
         /* Input Controls */
         .controls {
             background: #fdfdfd;
-            padding: 20px;
+            padding: 15px;
             border-radius: 15px;
             border: 1px solid #eee;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .input-row {
             display: flex;
             gap: 10px;
             justify-content: center;
-            flex-wrap: wrap;
+            flex-direction: column; /* Default mobile stack */
+        }
+
+        /* Desktop row view */
+        @media (min-width: 600px) {
+            .input-row { flex-direction: row; }
+            #game-container { padding: 40px; }
+            .team-box { font-size: 0.9em; }
         }
 
         input, select, button {
@@ -116,34 +134,41 @@
             border-radius: 8px;
             border: 1px solid #ccc;
             font-size: 1em;
+            width: 100%; /* Full width on mobile */
+            box-sizing: border-box;
         }
 
-        input { width: 300px; }
+        @media (min-width: 600px) {
+            input { width: 300px; }
+            select, button { width: auto; }
+        }
 
         button {
             background-color: #2d3436;
             color: white;
             border: none;
             cursor: pointer;
-            transition: transform 0.1s;
+            font-weight: bold;
         }
-
-        button:active { transform: scale(0.95); }
 
         /* The Dual Column Log */
         .log-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1fr; /* Single column mobile */
+            gap: 15px;
             margin-top: 20px;
             text-align: left;
+        }
+
+        @media (min-width: 768px) {
+            .log-grid { grid-template-columns: 1fr 1fr; }
         }
 
         .log-column {
             background: #f9f9f9;
             border-radius: 10px;
             padding: 15px;
-            height: 250px;
+            height: 200px;
             overflow-y: auto;
             border: 1px solid #eee;
         }
@@ -153,6 +178,9 @@
             font-size: 1em;
             border-bottom: 2px solid #ddd;
             padding-bottom: 5px;
+            position: sticky;
+            top: 0;
+            background: #f9f9f9;
         }
 
         .entry {
@@ -165,6 +193,14 @@
 
         .ben { background-color: #e8f8f5; border-left: 4px solid #2ecc71; }
         .cha { background-color: #fdf2f2; border-left: 4px solid #e74c3c; }
+
+        .credits {
+            margin-top: 30px;
+            font-size: 0.8em;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-5px); }
@@ -182,14 +218,14 @@
         <div id="tug-area">
             <div class="team-box left-box">Inclusive Features</div>
             <div id="rope-track">
-                <div id="marker">HDB</div>
+                <div id="marker">CEO</div>
             </div>
             <div class="team-box right-box">Environmental Features</div>
         </div>
 
         <div class="controls">
             <div class="input-row">
-                <input type="text" id="feature-input" placeholder="type a benefit or challenge">
+                <input type="text" id="feature-input" placeholder="Type a feature here...">
                 <select id="type-select">
                     <option value="inc-ben">Inclusive Benefit</option>
                     <option value="inc-cha">Inclusive Challenge</option>
@@ -203,14 +239,15 @@
         <div class="log-grid">
             <div class="log-column" id="inc-log">
                 <h3>Inclusive Log</h3>
-                </div>
+            </div>
             <div class="log-column" id="env-log">
                 <h3>Environmental Log</h3>
-                </div>
+            </div>
         </div>
-        <div style="height: 40px;"></div><div class="credits">
-    Created by <a href="https://instagram.com/geographer.stace" target="_blank" style="color: #3498db; text-decoration: none;">@geographer.stace</a>
-    </div>
+
+        <div class="credits">
+            Created by <a href="https://instagram.com/geographer.stace" target="_blank" style="color: #3498db; text-decoration: none; font-weight: bold;">@geographer.stace</a>
+        </div>
     </div>
 
     <script>
@@ -228,45 +265,51 @@
             let statusClass = "";
             let prefix = "";
 
-            // LOGIC
             if (type === 'inc-ben') {
-                direction = -10; // Pull Left
+                direction = -10;
                 logTarget = "inc-log";
                 statusClass = "ben";
                 prefix = "Benefit: ";
             } else if (type === 'inc-cha') {
-                direction = 10; // Push Right
+                direction = 10;
                 logTarget = "inc-log";
                 statusClass = "cha";
                 prefix = "Challenge: ";
             } else if (type === 'env-ben') {
-                direction = 10; // Pull Right
+                direction = 10;
                 logTarget = "env-log";
                 statusClass = "ben";
                 prefix = "Benefit: ";
             } else if (type === 'env-cha') {
-                direction = -10; // Push Left
+                direction = -10;
                 logTarget = "env-log";
                 statusClass = "cha";
                 prefix = "Challenge: ";
             }
 
-            // Update Position
             currentPos += direction;
             if (currentPos < 5) currentPos = 5;
             if (currentPos > 95) currentPos = 95;
             marker.style.left = currentPos + "%";
 
-            // Add to Column Log
             const logDiv = document.getElementById(logTarget);
             const entry = document.createElement('div');
             entry.className = `entry ${statusClass}`;
             entry.innerHTML = `<strong>${prefix}</strong> ${input.value}`;
+            
+            // Insert after the H3 title
             logDiv.insertBefore(entry, logDiv.children[1]);
 
-            // Reset
             input.value = "";
+            input.focus();
         }
+
+        // Allow 'Enter' key to submit
+        document.getElementById("feature-input").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                playTug();
+            }
+        });
     </script>
 </body>
 </html>
