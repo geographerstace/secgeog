@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sec 2 Geography: Urban Recall Challenge</title>
+    <title>Sec 2 Geography: HDB Facilities Challenge</title>
     <style>
         :root {
             --sg-blue: #005eb8;
@@ -20,18 +20,9 @@
             flex-direction: column;
             align-items: center;
             margin: 0;
-            padding: 20px;
+            padding: 10px; /* Reduced padding for mobile */
+            min-height: 100vh;
         }
-
-.credits {
-    margin-top: 50px;       /* Pushes footer down away from the game */
-    padding-bottom: 40px;    /* Creates white space at the very bottom of the page */
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    text-align: center;
-    width: 100%;
-    clear: both;             /* Ensures it stays below all floating elements */
-}
 
         /* START SCREEN */
         #start-screen {
@@ -46,6 +37,7 @@
             z-index: 200;
             text-align: center;
             padding: 20px;
+            box-sizing: border-box;
         }
 
         /* GAME LAYOUT */
@@ -53,8 +45,8 @@
             display: none;
             flex-direction: column;
             align-items: center;
+            width: 95%; /* Responsive width */
             max-width: 900px;
-            width: 100%;
             gap: 15px;
         }
 
@@ -71,6 +63,7 @@
 
         #game-image {
             width: 100%;
+            height: auto; /* Maintains aspect ratio */
             border-radius: 8px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.2);
         }
@@ -79,20 +72,22 @@
         #input-container {
             width: 100%;
             background: var(--panel);
-            padding: 30px;
+            padding: 20px;
             border-radius: 8px;
             text-align: center;
             box-sizing: border-box;
         }
 
         input[type="text"] {
-            width: 90%;
-            padding: 15px;
-            font-size: 1.4rem;
+            width: 100%; /* Full width on mobile */
+            max-width: 600px;
+            padding: 12px;
+            font-size: 1.2rem;
             border: 3px solid #ddd;
             border-radius: 10px;
             outline: none;
             text-align: center;
+            box-sizing: border-box;
         }
 
         input[type="text"]:focus { border-color: var(--sg-blue); }
@@ -101,7 +96,7 @@
             margin-top: 15px;
             font-weight: bold;
             min-height: 1.5em;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .success-text { color: var(--sg-green); }
@@ -112,43 +107,60 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             z-index: 300;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             color: white;
             text-align: center;
+            padding: 20px;
         }
 
         .big-btn {
-            padding: 15px 40px;
-            font-size: 1.3rem;
+            padding: 15px 35px;
+            font-size: 1.2rem;
             cursor: pointer;
             border-radius: 50px;
             border: none;
             background: white;
             color: var(--sg-blue);
             font-weight: bold;
-            transition: 0.2s;
+        }
+
+        .credits {
+            margin-top: 50px;
+            padding-bottom: 40px;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5rem; }
+            #ui-layer { font-size: 0.9rem; flex-direction: column; gap: 5px; text-align: center; }
+            input[type="text"] { font-size: 1rem; }
+            #modal-title { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
 
     <div id="start-screen">
-        <h1>HDB Facilities Challenge</h1>
-        <p style="max-width: 550px; line-height: 1.6; font-size: 1.2rem;">
-            Look at the photo of the HDB estate. Type the names of <b>9 different facilities</b>.<br><br>
-            You have <b>45 seconds</b>. Press <b>ENTER</b> to submit each answer!
+        <h1>HDB Facilities Recall</h1>
+        <p style="max-width: 500px; line-height: 1.6;">
+            Look at the HDB photo. Type the names of <b>9 facilities</b>.<br><br>
+            You have <b>45 seconds</b>. Press <b>ENTER</b> to submit.
         </p>
         <button class="big-btn" onclick="startGame()">START GAME</button>
     </div>
 
     <div id="game-layout">
         <div id="ui-layer">
-            <div>Time Remaining: <span id="timer" style="color:var(--sg-red); font-weight: bold;">45</span>s</div>
-            <div>Facilities Found: <span id="score" style="color:var(--sg-green); font-weight: bold;">0</span> / 9</div>
+            <div>Time Remaining: <span id="timer" style="color:var(--sg-red); font-weight:bold;">45</span>s</div>
+            <div>Found: <span id="score" style="color:var(--sg-green); font-weight:bold;">0</span> / 9</div>
         </div>
 
         <img src="Original.png" id="game-image">
@@ -160,12 +172,12 @@
     </div>
 
     <div id="modal-overlay">
-        <h2 id="modal-title" style="font-size: 3rem; margin-bottom: 10px;"></h2>
-        <p id="modal-body" style="font-size: 1.4rem; margin-bottom: 30px;"></p>
+        <h2 id="modal-title"></h2>
+        <p id="modal-body"></p>
         <button class="big-btn" onclick="location.reload()">Try Again</button>
     </div>
 
-<div class="credits">
+    <div class="credits">
         Created by <a href="https://instagram.com/geographer.stace" target="_blank" style="color: #3498db; text-decoration: none;">@geographer.stace</a>
     </div>
 
@@ -196,26 +208,20 @@
 
         inputField.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                const val = inputField.value.toLowerCase().trim();
-                checkAnswer(val);
+                checkAnswer(inputField.value.toLowerCase().trim());
             }
         });
 
         function checkAnswer(val) {
             if (val.length < 3) return;
-
             let matchFound = false;
 
             facilities.forEach((item) => {
                 if (foundItems.includes(item)) return;
-
                 const itemLower = item.toLowerCase();
-                const keywords = itemLower.split(' '); // e.g. ["bus", "stop"]
+                const keywords = itemLower.split(' ');
 
-                // Check if the input matches the full name OR any significant keyword
-                // This allows for slight misspelling or partial names (like "Hawker")
                 if (itemLower.includes(val) || val.includes(keywords[0])) {
-                    // Fuzzy check: allow match if input length is close to item length or match keyword
                     if (val.length >= Math.min(itemLower.length - 2, 4) || keywords.includes(val)) {
                         processCorrectAnswer(item);
                         matchFound = true;
@@ -224,7 +230,7 @@
             });
 
             if (!matchFound && val !== "") {
-                showFeedback(`"${inputField.value}" not recognized. Try again!`, "error-text");
+                showFeedback(`"${inputField.value}" not recognized.`, "error-text");
                 inputField.value = "";
             }
         }
@@ -234,14 +240,12 @@
             inputField.value = ""; 
             document.getElementById('score').textContent = foundItems.length;
             showFeedback(`Correct! Found the ${item}.`, "success-text");
-
             if (foundItems.length === 9) endGame(true);
         }
 
         function showFeedback(text, className) {
             feedback.textContent = text;
             feedback.className = className;
-            // Clear message after 1.5 seconds
             setTimeout(() => { feedback.textContent = ""; }, 1500);
         }
 
@@ -253,11 +257,9 @@
             if (win) {
                 document.getElementById('game-image').src = "Answer.png";
                 document.getElementById('modal-title').textContent = "Excellent!";
-                document.getElementById('modal-title').style.color = "var(--sg-green)";
                 document.getElementById('modal-body').innerHTML = "You found all 9 facilities!<br><br>Secret Code: <b>SG-URBAN-PRO-2026</b>";
             } else {
                 document.getElementById('modal-title').textContent = "Time's Up!";
-                document.getElementById('modal-title').style.color = "var(--sg-red)";
                 document.getElementById('modal-body').textContent = "You've run out of time. Try again next time!";
             }
         }
