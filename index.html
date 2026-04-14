@@ -6,58 +6,72 @@
     <title>Geography Interactives | @geographer.stace</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        :root {
+            --primary-dark: #2c3e50;
+            --accent-blue: #3b82f6;
+            --text-main: #2c3e50;
+            --text-muted: #64748b;
+            --bg-light: #f0f4f8;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f4f8;
-            color: 2c3e50;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
             line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
+
         header {
-           background-color: #2c3e50;
+            background-color: var(--primary-dark);
             color: #ecf0f1;
-            padding: 40px 20px;
+            padding: 3rem 1rem; /* Responsive padding */
             text-align: center;
             border-bottom: 5px solid #3498db;
         }
+
         header h1 {
             margin: 0;
-            font-size: 28pt;
+            font-size: clamp(2rem, 8vw, 3rem); /* Scales between 2rem and 3rem */
             letter-spacing: 1px;
         }
+
         header p {
-            margin: 10px 0 0;
-            font-size: 14pt;
+            margin: 10px auto 0;
+            font-size: clamp(1rem, 4vw, 1.2rem);
             font-style: italic;
             opacity: 0.9;
+            max-width: 600px;
         }
+
         main {
             flex: 1;
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 20px;
+            width: 100%;
         }
-        .intro {
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 12pt;
-            line-height: 1.6;
-        }
+
         .container {
             max-width: 1000px;
-            margin: 3rem auto;
-            padding: 0 1.5rem;
+            margin: 2rem auto;
+            padding: 0 1.25rem;
+            box-sizing: border-box;
         }
+
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
+            /* grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); */
+            /* Adjusted minmax for better fit on narrow phones */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
+
         .card {
             background: white;
             border-radius: 12px;
-            padding: 2rem;
+            padding: 1.5rem;
             text-decoration: none;
             color: inherit;
             border: 1px solid #e2e8f0;
@@ -66,51 +80,74 @@
             flex-direction: column;
             align-items: flex-start;
         }
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            border-color: #3b82f6;
+            border-color: var(--accent-blue);
         }
+
         .icon-box {
             background: #eff6ff;
-            color: #3b82f6;
+            color: var(--accent-blue);
             padding: 0.75rem;
             border-radius: 10px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
+
         .card h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.5rem;
+            margin: 0.75rem 0 0.5rem 0;
+            font-size: 1.4rem;
         }
+
         .card p {
-            color: #64748b;
+            color: var(--text-muted);
             font-size: 0.95rem;
             margin-bottom: 1.5rem;
         }
+
         .badge {
-            background: #3b82f6;
+            background: var(--accent-blue);
             color: white;
             font-size: 0.75rem;
             padding: 0.25rem 0.75rem;
             border-radius: 99px;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
         footer {
-            background-color: #2c3e50;
+            background-color: var(--primary-dark);
             color: #bdc3c7;
             text-align: center;
-            padding: 30px 20px;
-            margin-top: 50px;
+            padding: 2rem 1rem;
+            margin-top: auto;
             border-top: 1px solid #34495e;
         }
+
         footer p {
             margin: 5px 0;
-            font-size: 10pt;
+            font-size: 0.9rem;
         }
+
         footer a {
-            color: #3b82f6;
+            color: var(--accent-blue);
             text-decoration: none;
             font-weight: bold;
+        }
+
+        /* Small screen adjustments */
+        @media (max-width: 480px) {
+            header {
+                padding: 2rem 1rem;
+            }
+            .container {
+                margin: 1rem auto;
+            }
+            .card {
+                padding: 1.25rem;
+            }
         }
     </style>
 </head>
@@ -118,34 +155,36 @@
 
 <header>
     <h1>Sec 2 Geography</h1>
-    <p>Explore these interactive learning tools to help you master Geography content!</p>
+    <p>Interactive tools to master your Geography content!</p>
 </header>
 
-<div class="container">
-    <div class="grid">
-        <a href="https://geographerstace.github.io/sec2geog/hdbtugofwar/" class="card">
-            <div class="icon-box">
-                <i data-lucide="building-2"></i>
-            </div>
-            <span class="badge">Ch 9: Housing</span>
-            <h3>HDB Tug-of-War</h3>
-            <p>You are the CEO of HDB. Every dollar spent on a rooftop garden is a dollar not spent on a new senior-friendly ramp. Can you manage this urban balancing act? Build the estate of the future - but don't let the rope snap!</p>
-        </a>
+<main>
+    <div class="container">
+        <div class="grid">
+            <a href="https://geographerstace.github.io/sec2geog/hdbtugofwar/" class="card">
+                <div class="icon-box">
+                    <i data-lucide="building-2"></i>
+                </div>
+                <span class="badge">Ch 9: Housing</span>
+                <h3>HDB Tug-of-War</h3>
+                <p>You are the CEO of HDB. Manage the urban balancing act: build the estate of the future without letting the rope snap!</p>
+            </a>
 
-        <div class="card" style="opacity: 0.7; border-style: dashed;">
-            <div class="icon-box" style="background: #f1f5f9; color: #94a3b8;">
-                <i data-lucide="sparkles"></i>
+            <div class="card" style="opacity: 0.7; border-style: dashed;">
+                <div class="icon-box" style="background: #f1f5f9; color: #94a3b8;">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <span class="badge" style="background: #94a3b8;">Coming Soon</span>
+                <h3>Next Adventure</h3>
+                <p>Another interactive resource is currently being mapped out. Stay tuned!</p>
             </div>
-            <span class="badge" style="background: #94a3b8;">Coming Soon</span>
-            <h3>Next Adventure</h3>
-            <p>Another interactive resource is currently being mapped out. stay tuned!</p>
         </div>
     </div>
-</div>
+</main>
 
 <footer>
     <p>Created with ❤️ for Geography students</p>
-    <p>Follow updates on IG: <a href="https://instagram.com/geographer.stace" target="_blank">@geographer.stace</a></p>
+    <p>Follow updates on IG: <a href="https://instagram.com/geographer.stace" target="_blank" rel="noopener">@geographer.stace</a></p>
 </footer>
 
 <script>
