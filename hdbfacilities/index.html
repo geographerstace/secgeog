@@ -203,7 +203,7 @@
         </div>
 
         <div id="game-container">
-            <img src="Original.jpg" id="game-image">
+            <img src="Original.png" id="game-image">
             <svg id="click-mask" viewBox="0 0 1000 524" xmlns="http://www.w3.org/2000/svg">
                 <rect class="target-zone" x="25" y="278" width="183" height="113" data-target="w-school" />
                 <rect class="target-zone" x="80" y="556" width="193" height="175" data-target="w-sports" />
@@ -280,7 +280,7 @@
             overlay.style.display = 'flex';
 
             if (win) {
-                document.getElementById('game-image').src = "Answer.jpg";
+                document.getElementById('game-image').src = "Answer.png";
                 title.textContent = "Well Done!";
                 title.style.color = "var(--sg-green)";
                 body.innerHTML = "You found all facilities!<br>Secret Code:<br><span class='secret-code'>HDB-PRO-2026</span>";
