@@ -160,7 +160,7 @@
     <div id="game-layout">
         <div id="ui-layer">
             <div>Time Remaining: <span id="timer" style="color:var(--sg-red); font-weight:bold;">60</span>s</div>
-            <div>Found: <span id="score" style="color:var(--sg-green); font-weight:bold;">0</span> / 9</div>
+            <div>Found: <span id="score" style="color:var(--sg-green); font-weight:bold;">0</span> / 7</div>
         </div>
 
         <img src="Original.png" id="game-image">
@@ -240,7 +240,7 @@
             inputField.value = ""; 
             document.getElementById('score').textContent = foundItems.length;
             showFeedback(`Correct! Found the ${item}.`, "success-text");
-            if (foundItems.length === 9) endGame(true);
+            if (foundItems.length === 7) endGame(true);
         }
 
         function showFeedback(text, className) {
