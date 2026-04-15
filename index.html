@@ -12,12 +12,22 @@
             --text-main: #2c3e50;
             --text-muted: #64748b;
             --bg-light: #f0f4f8;
+            
+            /* High-Contrast Palette */
+            --sec1-color: #0d9488; /* Deep Teal */
+            --sec1-bg: #f0fdfa;
+            
+            --sec2-color: #2563eb; /* Royal Blue */
+            --sec2-bg: #eff6ff;
+            
+            --olevel-color: #d97706; /* Vibrant Amber/Gold */
+            --olevel-bg: #fffbeb;
         }
 
         body {
-           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f4f8;
-            color: #2c3e50;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
             display: flex;
@@ -28,14 +38,14 @@
         header {
             background-color: var(--primary-dark);
             color: #ecf0f1;
-            padding: 3rem 1rem; /* Responsive padding */
+            padding: 3rem 1rem;
             text-align: center;
             border-bottom: 5px solid #3498db;
         }
 
         header h1 {
             margin: 0;
-            font-size: clamp(2rem, 8vw, 3rem); /* Scales between 2rem and 3rem */
+            font-size: clamp(2rem, 8vw, 3rem);
             letter-spacing: 1px;
         }
 
@@ -47,6 +57,40 @@
             max-width: 600px;
         }
 
+        /* Filter Section */
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 2.5rem 0;
+            flex-wrap: wrap;
+            padding: 0 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.7rem 1.6rem;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: var(--text-muted);
+            border-radius: 99px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            font-size: 0.95rem;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-dark);
+            color: white;
+            border-color: var(--primary-dark);
+            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.2);
+        }
+
         main {
             flex: 1;
             width: 100%;
@@ -54,99 +98,101 @@
 
         .container {
             max-width: 1000px;
-            margin: 2rem auto;
+            margin: 0 auto 4rem;
             padding: 0 1.25rem;
             box-sizing: border-box;
         }
 
         .grid {
             display: grid;
-            /* grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); */
-            /* Adjusted minmax for better fit on narrow phones */
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
         }
 
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: 14px;
+            padding: 1.75rem;
             text-decoration: none;
             color: inherit;
             border: 1px solid #e2e8f0;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             align-items: flex-start;
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            border-color: var(--accent-blue);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
         }
 
+        /* Category Coloring */
+        .card[data-level="sec1"] .badge { background: var(--sec1-color); }
+        .card[data-level="sec1"] .icon-box { color: var(--sec1-color); background: var(--sec1-bg); }
+        .card[data-level="sec1"]:hover { border-color: var(--sec1-color); }
+
+        .card[data-level="sec2"] .badge { background: var(--sec2-color); }
+        .card[data-level="sec2"] .icon-box { color: var(--sec2-color); background: var(--sec2-bg); }
+        .card[data-level="sec2"]:hover { border-color: var(--sec2-color); }
+
+        .card[data-level="olevel"] .badge { background: var(--olevel-color); }
+        .card[data-level="olevel"] .icon-box { color: var(--olevel-color); background: var(--olevel-bg); }
+        .card[data-level="olevel"]:hover { border-color: var(--olevel-color); }
+
         .icon-box {
-            background: #eff6ff;
-            color: var(--accent-blue);
-            padding: 0.75rem;
-            border-radius: 10px;
-            margin-bottom: 1.25rem;
+            padding: 0.8rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .card h3 {
             margin: 0.75rem 0 0.5rem 0;
             font-size: 1.4rem;
+            font-weight: 700;
         }
 
         .card p {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 1rem;
             margin-bottom: 1.5rem;
+            line-height: 1.6;
         }
 
         .badge {
-            background: var(--accent-blue);
             color: white;
-            font-size: 0.75rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 99px;
-            font-weight: 600;
+            font-size: 0.7rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px; /* Slightly squarer for a "tag" look */
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
         }
 
         footer {
             background-color: var(--primary-dark);
             color: #bdc3c7;
             text-align: center;
-            padding: 2rem 1rem;
+            padding: 3rem 1rem;
             margin-top: auto;
-            border-top: 1px solid #34495e;
-        }
-
-        footer p {
-            margin: 5px 0;
-            font-size: 0.9rem;
         }
 
         footer a {
-            color: var(--accent-blue);
+            color: #3498db;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
         }
 
-        /* Small screen adjustments */
+        .hidden {
+            display: none;
+        }
+
         @media (max-width: 480px) {
-            header {
-                padding: 2rem 1rem;
-            }
-            .container {
-                margin: 1rem auto;
-            }
-            .card {
-                padding: 1.25rem;
-            }
+            header { padding: 2.5rem 1rem; }
+            .filter-btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -154,59 +200,85 @@
 
 <header>
     <h1>Sec 1 to 4 Geography</h1>
-    <p>Explore these interactive learning tools to help you master Geography content!</p>
+    <p>Explore these interactives to help you master Geography!</p>
 </header>
 
 <main>
     <div class="container">
-        <div class="grid">
-            <a href="https://geographerstace.github.io/sec2geog/hdbfacilities/" class="card" target="_blank" rel="noopener">
-        <div class="icon-box">
-            <i data-lucide="eye"></i> 
+        <div class="filter-container">
+            <button class="filter-btn active" onclick="filterLevel('all', this)">View All</button>
+            <button class="filter-btn" onclick="filterLevel('sec1', this)">Sec 1</button>
+            <button class="filter-btn" onclick="filterLevel('sec2', this)">Sec 2</button>
+            <button class="filter-btn" onclick="filterLevel('olevel', this)">O Level</button>
         </div>
-        <span class="badge">Sec 2: Housing</span>
-        <h3>HDB Facilities Challenge</h3>
-        <p>Put your observation skills to the test as you hunt for facilities within a HDB estate. Find all the facilities to earn a secret code before the timer runs out!</p>
-    </a>
-    
-    <a href="https://geographerstace.github.io/sec2geog/hdbtugofwar/" class="card" target="_blank" rel="noopener">
-        <div class="icon-box">
-            <i data-lucide="building-2"></i>
-        </div>
-        <span class="badge">Sec 2: Housing</span>
-        <h3>HDB Features Tug-of-War</h3>
-        <p>You are the CEO of HDB. Every dollar spent on a rooftop garden is a dollar not spent on a new senior-friendly ramp. Can you manage this urban balancing act? Build the estate of the future - but don't let the rope snap!</p>
-    </a>
-            
-    <a href="https://geographerstace.github.io/olevelgeog/climograph/" class="card" target="_blank" rel="noopener">
-        <div class="icon-box">
-            <i data-lucide="cloud-sun-rain"></i> 
-        </div>
-        <span class="badge">O Level: Climate</span>
-        <h3>Climograph Challenge</h3>
-        <p>Can you identify the climate type and make accurate calculations given a climograph?</p>
-    </a>
 
-            <div class="card" style="opacity: 0.7; border-style: dashed;">
-                <div class="icon-box" style="background: #f1f5f9; color: #94a3b8;">
-                    <i data-lucide="sparkles"></i>
-                </div>
+        <div class="grid" id="interactiveGrid">
+            
+            <a href="#" class="card" data-level="sec1" target="_blank">
+                <div class="icon-box"><i data-lucide="map-pin"></i></div>
+                <span class="badge">Sec 1</span>
+                <h3>Map Reading Essentials</h3>
+                <p>Master the basics of grid references and scale before your next field investigation.</p>
+            </a>
+
+            <a href="https://geographerstace.github.io/sec2geog/hdbfacilities/" class="card" data-level="sec2" target="_blank" rel="noopener">
+                <div class="icon-box"><i data-lucide="eye"></i></div>
+                <span class="badge">Sec 2</span>
+                <h3>HDB Facilities Challenge</h3>
+                <p>Hunt for essential facilities within a HDB estate. Find them all to earn your secret code!</p>
+            </a>
+            
+            <a href="https://geographerstace.github.io/sec2geog/hdbtugofwar/" class="card" data-level="sec2" target="_blank" rel="noopener">
+                <div class="icon-box"><i data-lucide="layout-dashboard"></i></div>
+                <span class="badge">Sec 2</span>
+                <h3>Housing Features Tug-of-War</h3>
+                <p>Should you go inclusive or environmental? Weigh the pros and cons while keeping residents happy!</p>
+            </a>
+            
+            <a href="https://geographerstace.github.io/olevelgeog/climograph/" class="card" data-level="olevel" target="_blank" rel="noopener">
+                <div class="icon-box"><i data-lucide="bar-chart-3"></i></div>
+                <span class="badge">O Level</span>
+                <h3>Climograph Challenge</h3>
+                <p>Can you identify the climate type and make accurate calculations given a climograph?</p>
+            </a>
+
+            <div class="card" style="opacity: 0.6; border-style: dashed;" data-level="all">
+                <div class="icon-box" style="background: #f1f5f9; color: #94a3b8;"><i data-lucide="zap"></i></div>
                 <span class="badge" style="background: #94a3b8;">Coming Soon</span>
-                <h3>Next Adventure</h3>
-                <p>Another interactive resource is currently being mapped out. Stay tuned!</p>
+                <h3>Future Topic</h3>
+                <p>We are currently developing more interactives. Check back soon for new updates!</p>
             </div>
+
         </div>
     </div>
 </main>
 
 <footer>
-    <p>Created with ❤️ for Geography students</p>
-    <p>Follow updates on IG: <a href="https://instagram.com/geographer.stace" target="_blank" rel="noopener">@geographer.stace</a></p>
+    <p>Created for Geography students with ❤️</p>
+    <p>Follow for updates: <a href="https://instagram.com/geographer.stace" target="_blank">@geographer.stace</a></p>
 </footer>
 
 <script>
-    // Initialize Lucide icons
+    // Initialize Icons
     lucide.createIcons();
+
+    function filterLevel(level, button) {
+        // Update Buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        // Update Cards
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const cardLevel = card.getAttribute('data-level');
+            
+            if (level === 'all' || cardLevel === level || cardLevel === 'all') {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    }
 </script>
 
 </body>
