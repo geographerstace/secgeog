@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geography O Level: Master Climograph</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; }
+        
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 5px; font-size: 1.5rem; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 20px; font-size: 0.9rem; }
+        
+        .question-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .nav-btn { padding: 8px 15px; background: #bdc3c7; color: #2c3e50; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.85rem; }
+        .nav-btn.active { background: #34495e; color: white; }
+
+        .game-layout { display: flex; gap: 20px; flex-direction: column; }
+        @media (min-width: 850px) {
+            .game-layout { flex-direction: row; gap: 40px; }
+            .graph-section { flex: 1.5; }
+            .quiz-section { flex: 1; }
+        }
+
+        .graph-section { width: 100%; min-width: 0; }
+        .climograph-container { border: 1px solid #ddd; padding: 15px; background: white; position: relative; }
+        .visual-area { height: 250px; display: flex; align-items: flex-end; justify-content: space-around; border-bottom: 2px solid #333; border-left: 2px solid #e74c3c; border-right: 2px solid #3498db; position: relative; padding-top: 20px; }
+        
+        .month-labels { display: flex; justify-content: space-around; margin-top: 5px; font-weight: bold; font-size: 12px; color: #555; }
+        .bar { width: 6%; max-width: 22px; background: #3498db; opacity: 0.8; position: relative; transition: height 0.5s; }
+        .temp-line-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        
+        .graph-legend { display: flex; justify-content: center; gap: 15px; margin-top: 15px; font-size: 0.8rem; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+        .line-symbol { width: 20px; height: 3px; background: #e74c3c; }
+        .bar-symbol { width: 12px; height: 12px; background: #3498db; }
+
+        .quiz-section { background: #fdfdfd; border: 1px solid #eee; padding: 20px; border-radius: 10px; width: 100%; box-sizing: border-box; }
+        .score-box { background: #2c3e50; color: white; text-align: center; padding: 10px; border-radius: 5px; font-size: 1.1rem; margin-bottom: 20px; }
+        
+        .input-field { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; }
+        input, select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+        input.error { border-color: #e74c3c; background-color: #fff5f5; }
+        input.success { border-color: #27ae60; background-color: #f5fff5; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
+        .submit-btn { background: #27ae60; color: white; }
+        .reset-btn { background: #e67e22; color: white; display: none; }
+        button:disabled { background: #95a5a6; cursor: not-allowed; }
+
+        .feedback-area { margin-top: 15px; font-size: 0.85rem; line-height: 1.4; border-top: 1px solid #eee; padding-top: 10px; min-height: 50px; }
+        .working-box { margin-top: 10px; background: #eef2f7; padding: 10px; border-radius: 5px; font-size: 0.75rem; display: none; word-wrap: break-word; }
+        .toggle-working { color: #3498db; cursor: pointer; text-decoration: underline; font-size: 0.75rem; display: none; }
+
+        .data-table-container { margin-top: 20px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; font-size: 10px; min-width: 500px; }
+        th, td { border: 1px solid #ddd; padding: 5px; text-align: center; }
+        .header-col { background: #f8f9fa; font-weight: bold; text-align: left; width: 80px; position: sticky; left: 0; }
+
+        .credits { margin-top: 30px; padding-bottom: 20px; font-size: 0.75rem; color: #7f8c8d; text-align: center; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Climograph Challenge</h1>
+    <p class="subtitle">Which climate type does each climograph represent? Support your response with accurate calculations!</p>
+
+    <div class="question-nav">
+        <button class="nav-btn active" id="btn0" onclick="loadLocation(0)">Location 1</button>
+        <button class="nav-btn" id="btn1" onclick="loadLocation(1)">Location 2</button>
+        <button class="nav-btn" id="btn2" onclick="loadLocation(2)">Location 3</button>
+    </div>
+
+    <div class="game-layout">
+        <div class="graph-section">
+            <div class="climograph-container">
+                <div class="visual-area" id="visualArea"><svg class="temp-line-svg" id="tempSvg"></svg></div>
+                <div class="month-labels"><span>J</span><span>F</span><span>M</span><span>A</span><span>M</span><span>J</span><span>J</span><span>A</span><span>S</span><span>O</span><span>N</span><span>D</span></div>
+                <div class="graph-legend">
+                    <div class="legend-item"><div class="line-symbol"></div> Temperature (°C)</div>
+                    <div class="legend-item"><div class="bar-symbol"></div> Rainfall (mm)</div>
+                </div>
+            </div>
+            <div class="data-table-container">
+                <table id="dataTable">
+                    <tr id="row-month"><td class="header-col">Month</td></tr>
+                    <tr id="row-temp"><td class="header-col">Temp (°C)</td></tr>
+                    <tr id="row-rainfall"><td class="header-col">Rainfall (mm)</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="quiz-section">
+            <div class="score-box">Total Score: <span id="totalScore">0</span> / 12 Marks</div>
+            
+            <div class="input-field">
+                <label>Annual Temp Range (°C)</label>
+                <input type="number" id="in-range" placeholder="Max - Min">
+            </div>
+            <div class="input-field">
+                <label>Total Annual Rainfall (mm)</label>
+                <input type="number" id="in-total" placeholder="Sum of all bars">
+            </div>
+            <div class="input-field">
+                <label>Mean Annual Temp (°C) [to 1 d.p.]</label>
+                <input type="number" step="0.1" id="in-mean" placeholder="Sum ÷ 12">
+            </div>
+            <div class="input-field">
+                <label>Climate Classification</label>
+                <select id="in-type">
+                    <option value="">-- Select --</option>
+                    <option value="tropical equatorial">Tropical Equatorial</option>
+                    <option value="tropical monsoon">Tropical Monsoon</option>
+                    <option value="cool temperate">Cool Temperate</option>
+                </select>
+            </div>
+
+            <div class="btn-group">
+                <button class="submit-btn" id="submitBtn" onclick="evaluateAnswers()">Check Answers</button>
+                <button class="reset-btn" id="resetBtn" onclick="resetCurrent()">Try Again</button>
+            </div>
+
+            <div class="feedback-area" id="feedbackArea"></div>
+            <span class="toggle-working" id="toggleWorking" onclick="document.getElementById('workingBox').style.display='block'">Show Working</span>
+            <div class="working-box" id="workingBox"></div>
+        </div>
+    </div>
+</div>
+
+<div class="credits">
+    Created by <a href="https://instagram.com/geographer.stace" target="_blank" style="color: #3498db; text-decoration: none;">@geographer.stace</a>
+</div>
+
+<script>
+    const climateData = [
+        { type: "tropical equatorial", temp: [26, 26, 27, 27, 28, 28, 27, 27, 27, 27, 26, 26], rain: [250, 210, 190, 170, 160, 140, 130, 150, 170, 210, 260, 310] },
+        { type: "tropical monsoon", temp: [24, 25, 27, 30, 31, 29, 28, 28, 28, 28, 26, 25], rain: [10, 10, 15, 30, 100, 450, 550, 400, 350, 120, 30, 10] },
+        { type: "cool temperate", temp: [2, 3, 6, 9, 13, 16, 18, 17, 14, 10, 6, 3], rain: [60, 50, 60, 55, 65, 70, 80, 85, 75, 80, 75, 70] }
+    ];
+
+    let currentIdx = 0; let totalMarks = 0; let solvedMarks = [0,0,0]; let attempts = [0,0,0];
+
+    function loadLocation(idx) {
+        currentIdx = idx; const data = climateData[idx];
+        document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+        resetUI(); renderGraph(data); renderTable(data);
+    }
+
+    function resetUI() {
+        document.getElementById('feedbackArea').innerHTML = "";
+        document.getElementById('workingBox').style.display = 'none';
+        document.getElementById('toggleWorking').style.display = 'none';
+        document.getElementById('in-range').className = document.getElementById('in-total').className = document.getElementById('in-mean').className = "";
+        document.getElementById('in-range').value = document.getElementById('in-total').value = document.getElementById('in-mean').value = document.getElementById('in-type').value = "";
+        document.getElementById('submitBtn').disabled = false; document.getElementById('resetBtn').style.display = 'none';
+    }
+
+    function renderGraph(data) {
+        const area = document.getElementById('visualArea'); const svg = document.getElementById('tempSvg');
+        area.querySelectorAll('.bar').forEach(b => b.remove()); svg.innerHTML = "";
+        const maxRain = Math.max(...data.rain, 350); let points = [];
+        data.rain.forEach((r, i) => {
+            const bar = document.createElement('div'); bar.className = 'bar'; bar.style.height = (r / maxRain * 100) + '%'; area.appendChild(bar);
+            const x = (i * (area.offsetWidth / 12)) + (area.offsetWidth / 24); const y = 250 - ((data.temp[i] + 5) * 6.5); 
+            points.push(`${x},${y}`); svg.innerHTML += `<circle cx="${x}" cy="${y}" r="3" fill="#e74c3c" />`;
+        });
+        svg.innerHTML += `<polyline points="${points.join(' ')}" fill="none" stroke="#e74c3c" stroke-width="2" />`;
+    }
+
+    function renderTable(data) {
+        const months = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+        document.getElementById('row-month').innerHTML = '<td class="header-col">Month</td>' + months.map(m => `<td>${m}</td>`).join('');
+        document.getElementById('row-temp').innerHTML = '<td class="header-col">Temp (°C)</td>' + data.temp.map(t => `<td>${t}</td>`).join('');
+        document.getElementById('row-rainfall').innerHTML = '<td class="header-col">Rainfall (mm)</td>' + data.rain.map(r => `<td>${r}</td>`).join('');
+    }
+
+    function evaluateAnswers() {
+        const data = climateData[currentIdx];
+        const cRange = Math.max(...data.temp) - Math.min(...data.temp);
+        const cTotal = data.rain.reduce((a, b) => a + b, 0);
+        const cMean = (data.temp.reduce((a, b) => a + b, 0) / 12).toFixed(1);
+
+        const uRange = parseFloat(document.getElementById('in-range').value);
+        const uTotal = parseFloat(document.getElementById('in-total').value);
+        const uMean = parseFloat(document.getElementById('in-mean').value);
+        const uType = document.getElementById('in-type').value;
+
+        let currentMarks = 0; let feedback = [];
+        
+        if(uRange === cRange) { currentMarks++; document.getElementById('in-range').classList.add('success'); } 
+        else { document.getElementById('in-range').classList.add('error'); feedback.push("Range: Max was "+Math.max(...data.temp)+" and Min was "+Math.min(...data.temp)+"."); }
+
+        if(uTotal === cTotal) { currentMarks++; document.getElementById('in-total').classList.add('success'); } 
+        else { document.getElementById('in-total').classList.add('error'); feedback.push("Rainfall: Check your sum of all 12 bars."); }
+
+        if(uMean == cMean) { currentMarks++; document.getElementById('in-mean').classList.add('success'); } 
+        else { document.getElementById('in-mean').classList.add('error'); feedback.push("Mean: Did you divide by 12 correctly?"); }
+
+        if(uType === data.type) { currentMarks++; } else { feedback.push("Classification: Look at the temp range and seasonality."); }
+
+        solvedMarks[currentIdx] = currentMarks;
+        updateTotalScore();
+
+        const fbArea = document.getElementById('feedbackArea');
+        fbArea.innerHTML = currentMarks === 4 ? "<span style='color:green'>Perfect! All 4 marks awarded.</span>" : "<span style='color:red'>You got "+currentMarks+"/4 marks.</span><br>" + feedback.join("<br>");
+        
+        document.getElementById('workingBox').innerHTML = `<b>Working:</b><br>Range: ${Math.max(...data.temp)} - ${Math.min(...data.temp)} = ${cRange}°C<br>Total: ${data.rain.join(' + ')} = ${cTotal}mm<br>Mean: Total Temp Sum ÷ 12 = ${cMean}°C`;
+        document.getElementById('toggleWorking').style.display = 'block';
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('resetBtn').style.display = 'block';
+        attempts[currentIdx]++;
+    }
+
+    function resetCurrent() { resetUI(); solvedMarks[currentIdx] = 0; updateTotalScore(); }
+    function updateTotalScore() { totalMarks = solvedMarks.reduce((a, b) => a + b, 0); document.getElementById('totalScore').innerText = totalMarks; }
+    
+    window.addEventListener('resize', () => renderGraph(climateData[currentIdx]));
+    window.onload = () => loadLocation(0);
+</script>
+</body>
+</html>
