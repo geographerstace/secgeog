@@ -548,7 +548,7 @@
       // 4b. Draw a SINGLE center arrow overlaying the rift line cleanly (No side-by-side duplicates)
       if (activeW > 24) {
         const activeCenterY = mapTopY + mapHeight / 2;
-        const centerArrow = activeStripe.polarity === 'normal' ? '↑ N' : '↓ S';
+        const centerArrow = activeStripe.polarity === 'normal' ? 'N' : 'R';
         
         // Draw background matching active stripe color so the orange line is neatly masked out behind the text
         ctxSim.fillStyle = activeStripe.polarity === 'normal' ? colorActiveNormal : colorActiveReversed;
