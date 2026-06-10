@@ -69,11 +69,11 @@
           <div class="flex items-center gap-3 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 self-center sm:self-auto text-xs">
             <div class="flex items-center gap-1.5">
               <span class="w-3.5 h-3.5 rounded bg-[#D48C70] inline-block border border-orange-300"></span>
-              <span class="text-slate-600 font-medium">Normal Polarity</span>
+              <span class="text-slate-600 font-medium">Normal Polarity (N)</span>
             </div>
             <div class="flex items-center gap-1.5">
               <span class="w-3.5 h-3.5 rounded bg-[#7A9EA6] inline-block border border-sky-300"></span>
-              <span class="text-slate-600 font-medium">Reversed Polarity</span>
+              <span class="text-slate-600 font-medium">Reversed Polarity (R)</span>
             </div>
           </div>
         </div>
@@ -474,7 +474,7 @@
         ctxSim.fillStyle = 'rgba(255, 255, 255, 0.65)';
         ctxSim.font = 'bold 11px sans-serif';
         ctxSim.textAlign = 'center';
-        const arrow = pol === 'normal' ? '↑ N' : '↓ S';
+        const arrow = pol === 'normal' ? 'N' : 'R';
         
         if (width > 24) {
           ctxSim.fillText(arrow, centerSegX, centerSegY);
