@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magnetic Striping Interactive</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts for Sketchnote & Educational feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #fcfcfc;
+    }
+    .sketchnote-title {
+      font-family: 'Fredoka', sans-serif;
+    }
+  </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between">
+
+  <!-- Header Banner -->
+  <header class="bg-white border-b border-slate-100 py-5 px-4 md:px-8">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-center sm:text-left flex flex-col items-center sm:items-start">
+        <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider w-max">Secondary 3 & 4 Geography</span>
+        <h1 class="sketchnote-title text-2xl md:text-3xl text-slate-800 mt-1 flex items-center justify-center sm:justify-start gap-2">
+          Magnetic Striping Simulator
+        </h1>
+      </div>
+      
+      <!-- Status Display -->
+      <div class="flex items-center gap-4 bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
+        <div class="text-center px-3">
+          <span class="block text-[10px] text-slate-400 font-medium uppercase">Earth's Polarity</span>
+          <span id="header-polarity-badge" class="inline-flex items-center gap-1 text-sm font-bold text-slate-500 mt-0.5">
+            <span class="w-2 h-2 rounded-full bg-slate-500"></span> Reversed
+          </span>
+        </div>
+        <div class="w-px h-8 bg-slate-200"></div>
+        <div class="text-center px-3">
+          <span class="block text-[10px] text-slate-400 font-medium uppercase">Spreading Rate</span>
+          <span id="header-speed-badge" class="text-sm font-bold text-slate-700 mt-0.5">Medium</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-6xl w-full mx-auto p-4 md:p-8 flex flex-col gap-6">
+    
+    <!-- TOP ROW: Main Interactive Aerial Map (Full Width) -->
+    <section class="w-full">
+      <div class="bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-sm flex flex-col">
+        <div class="flex flex-col items-center sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div class="text-center sm:text-left">
+            <p class="text-slate-400 text-xs mt-0.5">Move your cursor or tap/drag across the seafloor map to inspect the geological age and magnetic polarity.</p>
+          </div>
+          
+          <!-- Key / Legend -->
+          <div class="flex items-center gap-3 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 self-center sm:self-auto text-xs">
+            <div class="flex items-center gap-1.5">
+              <span class="w-3.5 h-3.5 rounded bg-[#D48C70] inline-block border border-orange-300"></span>
+              <span class="text-slate-600 font-medium">Normal Polarity</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-3.5 h-3.5 rounded bg-[#7A9EA6] inline-block border border-sky-300"></span>
+              <span class="text-slate-600 font-medium">Reversed Polarity</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="relative w-full bg-white rounded-2xl border border-slate-100 overflow-hidden" style="min-height: 330px;">
+          <canvas id="canvas-simulator" class="w-full block"></canvas>
+          
+          <!-- Interactive Ruler HUD Layer -->
+          <div class="absolute bottom-4 left-4 right-4 flex justify-between text-[11px] font-bold text-slate-400 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm border border-slate-100 pointer-events-none">
+            <span>Older Crust</span>
+            <span class="text-orange-500">Mid-Oceanic Ridge (Youngest Crust)</span>
+            <span>Older Crust</span>
+          </div>
+
+          <!-- Live Inspect Overlay Popover -->
+          <div id="hover-popover" class="hidden absolute bg-white/95 border border-slate-200 p-3 rounded-xl shadow-lg pointer-events-none text-xs w-48 space-y-1 z-10">
+            <div class="font-bold text-indigo-700 border-b border-slate-100 pb-1 mb-1">Seafloor Segment</div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Age:</span>
+              <span id="pop-age" class="font-semibold text-slate-700"></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Polarity:</span>
+              <span id="pop-polarity" class="font-semibold text-slate-700"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOTTOM ROW: Controls and Microscope (Perfect 2-Column Desktop Grid Alignment) -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+      
+      <!-- Lab Controls -->
+      <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col justify-start gap-4">
+        <div>
+          <h2 class="sketchnote-title text-lg md:text-xl text-slate-800 flex items-center gap-2">
+            <i data-lucide="sliders" class="text-indigo-500 w-5 h-5"></i>
+            Lab Controls
+          </h2>
+          <p class="text-slate-500 text-xs mt-1">Select a polarity, choose your spreading rate, then run the simulation.</p>
+        </div>
+
+        <!-- Magnet Toggle Controller -->
+        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+          <label class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Magnetic Polarity</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="btn-polarity-normal" class="py-3 px-2 rounded-xl font-bold text-sm border-2 transition-all flex flex-col items-center gap-1 bg-slate-50 border-transparent text-slate-500 hover:bg-white">
+              <span>Normal</span>
+            </button>
+            <button id="btn-polarity-reversed" class="py-3 px-2 rounded-xl font-bold text-sm border-2 transition-all flex flex-col items-center gap-1 bg-white border-sky-400 text-sky-700 shadow-sm">
+              <span>Reversed</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Spreading Speed Slider -->
+        <div class="space-y-2 pt-2">
+          <div class="flex justify-between text-xs">
+            <span class="font-semibold text-slate-500 uppercase tracking-wider">Spreading Rate</span>
+            <span id="label-speed" class="font-bold text-slate-700">Medium</span>
+          </div>
+          <input id="slider-speed" type="range" min="1" max="3" value="2" class="w-full accent-indigo-600 h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer">
+        </div>
+        
+        <!-- Simulation Run Controls (Moved below the spreading rate slider) -->
+        <div class="flex gap-2 pt-2">
+          <button id="btn-play-pause" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm shadow-indigo-100 text-sm">
+            <span id="play-pause-icon-container"><i data-lucide="play" class="w-4 h-4"></i></span> <span id="text-play-pause">Run Simulation</span>
+          </button>
+          <button id="btn-reset" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl flex items-center justify-center transition-all" title="Reset Simulation">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Basalt Microscope Micro-View -->
+      <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col justify-start gap-4">
+        <div>
+          <h3 class="sketchnote-title text-lg md:text-xl text-slate-800 flex items-center gap-2">
+            <i data-lucide="zoom-in" class="text-orange-500 w-5 h-5"></i>
+            Rock Microscope
+          </h3>
+          <p class="text-slate-500 text-xs mt-1">Zoomed view of iron-rich minerals in balsaltic rock produced at the ridge, aligned with the Earth's polarity</p>
+        </div>
+        
+        <!-- Microscope Canvas Container -->
+        <div class="relative flex justify-center items-center py-4 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden flex-grow">
+          <canvas id="canvas-microscope" width="160" height="160" class="bg-white rounded-full border-4 border-slate-200 shadow-inner"></canvas>
+          
+          <!-- Crosshair graphic overlay -->
+          <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+            <div class="w-full h-px border-t border-dashed border-slate-200"></div>
+            <div class="absolute w-px h-full border-l border-dashed border-slate-200"></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Clean footer -->
+  <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400 mt-8">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col items-center justify-center gap-2">
+      <p>Created with ❤️ for Geography students</p>
+      <p class="flex items-center gap-1">
+      <span>Follow for updates: <a href="https://www.instagram.com/geographer.stace/" target="_blank" class="text-indigo-600">@geographer.stace</a></span>
+    </p>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // App State Configuration - Starts Paused
+    let isRunning = false; 
+    let spreadingSpeedLevel = 2; // 1: Slow, 2: Med, 3: Fast
+    let currentPolarity = 'reversed'; // Initialized to reversed
+    
+    // Physical system model state
+    let stripes = []; // Array of moving crust bands
+    const ridgePosition = 0.5; // Central mid-oceanic ridge x-coord (normalized to canvas width)
+    let activeStripe = {
+      polarity: 'reversed', // Initialized to reversed
+      width: 10,
+      age: 0
+    };
+    
+    // UI Elements
+    const canvasSim = document.getElementById('canvas-simulator');
+    const ctxSim = canvasSim.getContext('2d');
+    const canvasMic = document.getElementById('canvas-microscope');
+    const ctxMic = canvasMic.getContext('2d');
+    const hoverPopover = document.getElementById('hover-popover');
+
+    // Microscope state (needle alignments)
+    let microNeedles = [];
+    for (let i = 0; i < 24; i++) {
+      microNeedles.push({
+        x: 25 + Math.random() * 110,
+        y: 25 + Math.random() * 110,
+        angle: Math.PI, // Initialized to reversed (180 degrees / Downward)
+        length: 11 + Math.random() * 7,
+        wiggleOffset: Math.random() * 100
+      });
+    }
+
+    // Set canvas dimensions dynamically
+    function resizeCanvas() {
+      const container = canvasSim.parentNode;
+      canvasSim.width = container.clientWidth;
+      canvasSim.height = 320;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Set up active simulation stripes
+    function initStripes() {
+      stripes = [];
+      // Seed initial starting stripes moving away symmetrically
+      let seedPolarities = ['reversed', 'normal', 'reversed', 'normal', 'reversed', 'normal'];
+      let segmentWidth = 55;
+      
+      // Left side segments
+      for (let i = 0; i < seedPolarities.length; i++) {
+        const pol = seedPolarities[i];
+        stripes.push({
+          side: 'left',
+          width: segmentWidth,
+          polarity: pol,
+          distance: (seedPolarities.length - i) * segmentWidth + 10,
+          age: (seedPolarities.length - i) * 1.5
+        });
+      }
+      // Right side segments matching
+      for (let i = 0; i < seedPolarities.length; i++) {
+        const pol = seedPolarities[i];
+        stripes.push({
+          side: 'right',
+          width: segmentWidth,
+          polarity: pol,
+          distance: (seedPolarities.length - i) * segmentWidth + 10,
+          age: (seedPolarities.length - i) * 1.5
+        });
+      }
+      
+      // Initialize center active stripe with reversed polarity
+      activeStripe = {
+        polarity: 'reversed',
+        width: 10,
+        age: 0
+      };
+    }
+    initStripes();
+
+    // Controller Binding
+    const btnPlayPause = document.getElementById('btn-play-pause');
+    const playPauseIconContainer = document.getElementById('play-pause-icon-container');
+    const textPlayPause = document.getElementById('text-play-pause');
+    const btnReset = document.getElementById('btn-reset');
+    const btnPolNormal = document.getElementById('btn-polarity-normal');
+    const btnPolReversed = document.getElementById('btn-polarity-reversed');
+    const sliderSpeed = document.getElementById('slider-speed');
+    const labelSpeed = document.getElementById('label-speed');
+
+    // UI Badges updates
+    const headerPolarityBadge = document.getElementById('header-polarity-badge');
+    const headerSpeedBadge = document.getElementById('header-speed-badge');
+
+    function updateHeaderHUD() {
+      if (currentPolarity === 'normal') {
+        headerPolarityBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Normal`;
+        headerPolarityBadge.className = "inline-flex items-center gap-1 text-sm font-bold text-emerald-600 mt-0.5";
+      } else {
+        headerPolarityBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-500"></span> Reversed`;
+        headerPolarityBadge.className = "inline-flex items-center gap-1 text-sm font-bold text-slate-500 mt-0.5";
+      }
+
+      const speeds = ["Slow", "Medium", "Fast"];
+      headerSpeedBadge.textContent = speeds[spreadingSpeedLevel - 1];
+    }
+
+    btnPlayPause.addEventListener('click', () => {
+      isRunning = !isRunning;
+      if (isRunning) {
+        textPlayPause.textContent = "Pause Simulation";
+        playPauseIconContainer.innerHTML = `<i data-lucide="pause" class="w-4 h-4"></i>`;
+      } else {
+        textPlayPause.textContent = "Run Simulation";
+        playPauseIconContainer.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i>`;
+      }
+      lucide.createIcons();
+    });
+
+    btnReset.addEventListener('click', () => {
+      initStripes();
+      updateHeaderHUD();
+    });
+
+    function setPolarity(pol) {
+      if (currentPolarity === pol) return; // Strict guard preventing double-trigger breaks
+      
+      // When polarity flips, seal current active stripe symmetrically to left/right arrays
+      if (activeStripe.width > 0) {
+        const halfWidth = activeStripe.width / 2;
+        stripes.push({
+          side: 'left',
+          width: halfWidth,
+          polarity: activeStripe.polarity,
+          distance: 0,
+          age: activeStripe.age
+        });
+        stripes.push({
+          side: 'right',
+          width: halfWidth,
+          polarity: activeStripe.polarity,
+          distance: 0,
+          age: activeStripe.age
+        });
+      }
+
+      // Start new active stripe with the flipped polarity at zero width
+      currentPolarity = pol;
+      activeStripe = {
+        polarity: pol,
+        width: 0,
+        age: 0
+      };
+
+      // Style updates
+      if (currentPolarity === 'normal') {
+        btnPolNormal.className = "py-3 px-2 rounded-xl font-bold text-sm border-2 transition-all flex flex-col items-center gap-1 bg-white border-orange-400 text-orange-700 shadow-sm";
+        btnPolReversed.className = "py-3 px-2 rounded-xl font-bold text-sm border-2 transition-all flex flex-col items-center gap-1 bg-slate-50 border-transparent text-slate-500 hover:bg-white";
+      } else {
+        btnPolReversed.className = "py-3 px-2 rounded-xl font-bold text-sm border-2 transition-all flex flex-col items-center gap-1 bg-white border-sky-400 text-sky-700 shadow-sm";
+        btnPolNormal.className = "py-3 px-2 rounded-xl font-bold text-sm border-2 transition-all flex flex-col items-center gap-1 bg-slate-50 border-transparent text-slate-500 hover:bg-white";
+      }
+
+      updateHeaderHUD();
+    }
+
+    btnPolNormal.addEventListener('click', () => setPolarity('normal'));
+    btnPolReversed.addEventListener('click', () => setPolarity('reversed'));
+
+    sliderSpeed.addEventListener('input', (e) => {
+      spreadingSpeedLevel = parseInt(e.target.value);
+      const speeds = ["Slow", "Medium", "Fast"];
+      labelSpeed.textContent = speeds[spreadingSpeedLevel - 1];
+      updateHeaderHUD();
+    });
+
+    // Device-Friendly Interaction: Mouse & Touch Tracking
+    let inspectX = -1;
+    let inspectY = -1;
+
+    function handleInspectMove(x, y) {
+      inspectX = x;
+      inspectY = y;
+    }
+
+    function handleInspectEnd() {
+      inspectX = -1;
+      inspectY = -1;
+      hoverPopover.classList.add('hidden');
+    }
+
+    // Mouse Events
+    canvasSim.addEventListener('mousemove', (e) => {
+      const rect = canvasSim.getBoundingClientRect();
+      handleInspectMove(e.clientX - rect.left, e.clientY - rect.top);
+    });
+    canvasSim.addEventListener('mouseleave', () => {
+      handleInspectEnd();
+    });
+
+    // Touch Events for Tablets/Smartboards
+    canvasSim.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        const rect = canvasSim.getBoundingClientRect();
+        handleInspectMove(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+      }
+    }, { passive: true });
+
+    canvasSim.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        const rect = canvasSim.getBoundingClientRect();
+        handleInspectMove(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+      }
+    }, { passive: true });
+
+    canvasSim.addEventListener('touchend', () => {
+      handleInspectEnd();
+    });
+
+    function drawSimulator() {
+      ctxSim.clearRect(0, 0, canvasSim.width, canvasSim.height);
+      const w = canvasSim.width;
+      const h = canvasSim.height;
+      const ridgeX = w * ridgePosition;
+
+      // 1. Draw Clean Base Map Background
+      ctxSim.fillStyle = '#ffffff';
+      ctxSim.fillRect(0, 0, w, h);
+
+      // Speed scale mapping
+      const speedMap = [0.15, 0.35, 0.7];
+      const dx = speedMap[spreadingSpeedLevel - 1];
+
+      // Update simulation physics logic
+      if (isRunning) {
+        activeStripe.width += dx * 2;
+        activeStripe.age += 0.004;
+
+        stripes.forEach(s => {
+          s.distance += dx;
+          s.age += 0.004;
+        });
+
+        // Delete extremely far offscreen stripes
+        stripes = stripes.filter(s => s.distance < ridgeX + 150);
+      }
+
+      // 2. Setup Aerial Map Height Boundary for Stripes
+      const mapTopY = 70;
+      const mapHeight = 180;
+
+      // 3. Draw Alternate Colored Seafloor Map Stripes
+      const colorNormal = '#D48C70'; // Sketchnote Terracotta
+      const colorReversed = '#7A9EA6'; // Sketchnote Muted Blue
+      const colorActiveNormal = '#E29E84';
+      const colorActiveReversed = '#8DB0B8';
+
+      let hoverSegment = null;
+
+      // Render a simple top-down map rectangular segment
+      function renderStripeRect(side, pol, startX, width, rawAge, actualDist) {
+        const xLeft = side === 'left' ? startX - width : startX;
+        const xRight = xLeft + width;
+
+        ctxSim.fillStyle = pol === 'normal' ? colorNormal : colorReversed;
+        
+        ctxSim.beginPath();
+        ctxSim.rect(xLeft, mapTopY, width, mapHeight);
+        ctxSim.fill();
+        
+        // Draw segment borders
+        ctxSim.strokeStyle = '#F1F5F9';
+        ctxSim.lineWidth = 1.5;
+        ctxSim.stroke();
+
+        const centerSegX = xLeft + width / 2;
+        const centerSegY = mapTopY + mapHeight / 2;
+
+        // Draw magnetic arrow indicators inside
+        ctxSim.fillStyle = 'rgba(255, 255, 255, 0.65)';
+        ctxSim.font = 'bold 11px sans-serif';
+        ctxSim.textAlign = 'center';
+        const arrow = pol === 'normal' ? '↑ N' : '↓ S';
+        
+        if (width > 24) {
+          ctxSim.fillText(arrow, centerSegX, centerSegY);
+        }
+
+        // Collision check inside segment rectangle
+        if (inspectX >= xLeft && inspectX <= xRight && inspectY >= mapTopY && inspectY <= mapTopY + mapHeight) {
+          hoverSegment = {
+            side: side,
+            polarity: pol === 'normal' ? 'Normal' : 'Reversed',
+            age: `${Math.floor(rawAge * 100) / 100} million years ago`,
+            distance: `${Math.round(actualDist)} km`,
+            color: pol === 'normal' ? 'border-orange-400' : 'border-sky-400'
+          };
+
+          // draw outline highlight
+          ctxSim.strokeStyle = '#4F46E5';
+          ctxSim.lineWidth = 2.5;
+          ctxSim.strokeRect(xLeft, mapTopY, width, mapHeight);
+        }
+      }
+
+      // Draw Center Active Stripe Background
+      const activeW = activeStripe.width;
+      const actLeft = ridgeX - activeW / 2;
+      const actRight = ridgeX + activeW / 2;
+
+      ctxSim.fillStyle = activeStripe.polarity === 'normal' ? colorActiveNormal : colorActiveReversed;
+      ctxSim.fillRect(actLeft, mapTopY, activeW, mapHeight);
+      ctxSim.strokeStyle = '#F1F5F9';
+      ctxSim.lineWidth = 1.5;
+      ctxSim.strokeRect(actLeft, mapTopY, activeW, mapHeight);
+
+      if (inspectX >= actLeft && inspectX <= actRight && inspectY >= mapTopY && inspectY <= mapTopY + mapHeight) {
+        hoverSegment = {
+          side: 'Active Center',
+          polarity: activeStripe.polarity === 'normal' ? 'Normal' : 'Reversed',
+          age: '0 million years ago (Brand New)',
+          distance: '0 km',
+          color: 'border-indigo-500'
+        };
+        ctxSim.strokeStyle = '#4F46E5';
+        ctxSim.lineWidth = 2.5;
+        ctxSim.strokeRect(actLeft, mapTopY, activeW, mapHeight);
+      }
+
+      // Draw Left-Sided Crustal Plates
+      let leftStripes = stripes.filter(s => s.side === 'left').sort((a, b) => a.distance - b.distance);
+      let currLeftStart = actLeft;
+      leftStripes.forEach(s => {
+        renderStripeRect('left', s.polarity, currLeftStart, s.width, s.age, ridgeX - (currLeftStart - s.width / 2));
+        currLeftStart -= s.width;
+      });
+
+      // Draw Right-Sided Crustal Plates
+      let rightStripes = stripes.filter(s => s.side === 'right').sort((a, b) => a.distance - b.distance);
+      let currRightStart = actRight;
+      rightStripes.forEach(s => {
+        renderStripeRect('right', s.polarity, currRightStart, s.width, s.age, (currRightStart + s.width / 2) - ridgeX);
+        currRightStart += s.width;
+      });
+
+      // 4. Draw central rift line at the Mid-Ocean Ridge (Gently glowing orange line)
+      ctxSim.strokeStyle = '#FF7043';
+      ctxSim.lineWidth = 3;
+      ctxSim.beginPath();
+      ctxSim.moveTo(ridgeX, mapTopY - 4);
+      ctxSim.lineTo(ridgeX, mapTopY + mapHeight + 4);
+      ctxSim.stroke();
+
+      // 4b. Draw a SINGLE center arrow overlaying the rift line cleanly (No side-by-side duplicates)
+      if (activeW > 24) {
+        const activeCenterY = mapTopY + mapHeight / 2;
+        const centerArrow = activeStripe.polarity === 'normal' ? '↑ N' : '↓ S';
+        
+        // Draw background matching active stripe color so the orange line is neatly masked out behind the text
+        ctxSim.fillStyle = activeStripe.polarity === 'normal' ? colorActiveNormal : colorActiveReversed;
+        ctxSim.beginPath();
+        ctxSim.arc(ridgeX, activeCenterY - 3, 14, 0, Math.PI * 2);
+        ctxSim.fill();
+        
+        ctxSim.fillStyle = '#ffffff';
+        ctxSim.font = 'bold 11px sans-serif';
+        ctxSim.textAlign = 'center';
+        ctxSim.fillText(centerArrow, ridgeX, activeCenterY);
+      }
+
+      // Draw symmetrical motion arrows (Leftward vector at top)
+      ctxSim.fillStyle = '#475569';
+      ctxSim.beginPath();
+      ctxSim.moveTo(ridgeX - 50, mapTopY - 14);
+      ctxSim.lineTo(ridgeX - 70, mapTopY - 14);
+      ctxSim.lineTo(ridgeX - 70, mapTopY - 18);
+      ctxSim.lineTo(ridgeX - 80, mapTopY - 12);
+      ctxSim.lineTo(ridgeX - 70, mapTopY - 6);
+      ctxSim.lineTo(ridgeX - 70, mapTopY - 10);
+      ctxSim.lineTo(ridgeX - 50, mapTopY - 10);
+      ctxSim.closePath();
+      ctxSim.fill();
+
+      // Rightward vector at top
+      ctxSim.beginPath();
+      ctxSim.moveTo(ridgeX + 50, mapTopY - 14);
+      ctxSim.lineTo(ridgeX + 70, mapTopY - 14);
+      ctxSim.lineTo(ridgeX + 70, mapTopY - 18);
+      ctxSim.lineTo(ridgeX + 80, mapTopY - 12);
+      ctxSim.lineTo(ridgeX + 70, mapTopY - 6);
+      ctxSim.lineTo(ridgeX + 70, mapTopY - 10);
+      ctxSim.lineTo(ridgeX + 50, mapTopY - 10);
+      ctxSim.closePath();
+      ctxSim.fill();
+
+      // 5. Annotations & Title
+      ctxSim.fillStyle = '#1E293B';
+      ctxSim.font = 'bold 12px sans-serif';
+      ctxSim.textAlign = 'center';
+      ctxSim.fillText('MID-OCEANIC RIDGE', ridgeX, 22);
+
+      // Render Hover inspection info popover
+      if (hoverSegment) {
+        hoverPopover.classList.remove('hidden');
+        document.getElementById('pop-age').textContent = hoverSegment.age;
+        document.getElementById('pop-polarity').textContent = hoverSegment.polarity;
+        
+        hoverPopover.className = `absolute bg-white/95 border-2 ${hoverSegment.color} p-3 rounded-xl shadow-lg pointer-events-none text-xs w-52 space-y-1 transition-all z-10`;
+        hoverPopover.style.left = `${Math.min(inspectX + 15, w - 230)}px`;
+        hoverPopover.style.top = `${Math.min(inspectY + 15, h - 130)}px`;
+      } else {
+        hoverPopover.classList.add('hidden');
+      }
+    }
+
+    // Microscope Drawing Loop
+    function drawMicroscope() {
+      ctxMic.clearRect(0, 0, canvasMic.width, canvasMic.height);
+      const cx = canvasMic.width / 2;
+      const cy = canvasMic.height / 2;
+      const r = canvasMic.width / 2;
+
+      // Draw cooling liquid/semisolid background
+      ctxMic.fillStyle = '#FEF3C7'; // soft basalt warm glow
+      ctxMic.beginPath();
+      ctxMic.arc(cx, cy, r, 0, Math.PI * 2);
+      ctxMic.fill();
+
+      // Magnetite mineral alignments
+      const targetAngle = currentPolarity === 'normal' ? 0 : Math.PI; // 0 for Upward (North), PI for Downward (South)
+
+      microNeedles.forEach((needle, idx) => {
+        const angleDiff = targetAngle - needle.angle;
+        const normDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+        
+        if (isRunning) {
+          needle.angle += normDiff * 0.05; // speed of mineral rotation alignment
+          needle.wiggleOffset += 0.01;
+        }
+
+        const dx = Math.sin(needle.wiggleOffset) * 0.2;
+        const dy = Math.cos(needle.wiggleOffset) * 0.2;
+
+        const startX = needle.x + dx;
+        const startY = needle.y + dy;
+
+        ctxMic.save();
+        ctxMic.translate(startX, startY);
+        ctxMic.rotate(needle.angle);
+
+        // Draw rod representation of iron crystal
+        ctxMic.lineWidth = 3;
+        ctxMic.strokeStyle = '#475569';
+        ctxMic.beginPath();
+        ctxMic.moveTo(0, -needle.length/2);
+        ctxMic.lineTo(0, needle.length/2);
+        ctxMic.stroke();
+
+        // Color tip indicating North vector (Orange for North magnet)
+        ctxMic.fillStyle = '#FF7043';
+        ctxMic.beginPath();
+        ctxMic.moveTo(-3, -needle.length/2);
+        ctxMic.lineTo(3, -needle.length/2);
+        ctxMic.lineTo(0, -needle.length/2 - 4);
+        ctxMic.closePath();
+        ctxMic.fill();
+
+        ctxMic.restore();
+      });
+
+      // Draw standard frame boundaries
+      ctxMic.strokeStyle = '#E2E8F0';
+      ctxMic.lineWidth = 4;
+      ctxMic.beginPath();
+      ctxMic.arc(cx, cy, r - 2, 0, Math.PI * 2);
+      ctxMic.stroke();
+    }
+
+    // Unified Animation loop
+    function loop() {
+      drawSimulator();
+      drawMicroscope();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>
