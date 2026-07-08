@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sec 1 Geography: River Level Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --river-blue: #3498db;
+            --flood-red: #e74c3c;
+            --drought-orange: #f39c12;
+            --bank-brown: #795548;
+            --bg-color: #f0f4f8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 { 
+            color: #2c3e50; 
+            text-align: center; 
+            margin-bottom: 5px; 
+            font-size: 28px;
+        }
+        
+        p.subtitle { 
+            text-align: center; 
+            color: #7f8c8d; 
+            margin-bottom: 30px; 
+            font-size: 16px;
+        }
+
+        .simulation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* River Visualizer */
+        .river-display {
+            position: relative;
+            height: 300px;
+            background: #ecf0f1;
+            border: 4px solid var(--bank-brown);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .water {
+            background-color: var(--river-blue);
+            width: 100%;
+            transition: height 0.5s ease-in-out;
+            position: relative;
+        }
+
+        .label-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .input-group {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid var(--river-blue);
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 12px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Pure text-like input box without spinner arrows */
+        input[type="number"] {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 12px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--river-blue);
+        }
+
+        /* Hide HTML5 Number Input Spinners completely */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: var(--river-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover { 
+            background-color: #2980b9; 
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled { 
+            background-color: #bdc3c7; 
+            cursor: not-allowed; 
+        }
+
+        /* Status Alerts */
+        #status-msg {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .alert-flood { background-color: #fadbd8; color: var(--flood-red); display: block !important; }
+        .alert-drought { background-color: #fdebd0; color: var(--drought-orange); display: block !important; }
+        .alert-normal { background-color: #d4efdf; color: #27ae60; display: block !important; }
+        .alert-info { background-color: #ebf5fb; color: #2980b9; display: block !important; }
+
+        .stat-box { 
+            text-align: center; 
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px dashed #cbd5e1;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .stat-val { 
+            font-weight: bold; 
+            font-size: 28px; 
+            color: var(--river-blue); 
+            margin: 4px 0;
+        }
+
+        .graph-container {
+            position: relative;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        canvas {
+            max-height: 300px;
+            width: 100% !important;
+        }
+
+        /* Muted footer styles matching geographic aesthetic */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.15s ease;
+        }
+
+        footer a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+
+        /* Tablet Responsive Rules */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .simulation-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .river-display {
+                height: 220px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* Mobile Responsive Rules */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .input-wrapper {
+                flex-direction: column;
+            }
+
+            input[type="number"] {
+                width: 100%;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            p.subtitle {
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Water Budget</h1>
+    <p class="subtitle">How does water deficit & surplus affect river water levels?</p>
+
+    <div class="simulation-grid">
+        <div class="river-display" id="river-box">
+            <div id="water-fill" class="water" style="height: 50%;"></div>
+            <div class="label-overlay">Current Month: <span id="month-display">January</span></div>
+        </div>
+
+        <div class="controls">
+            <div class="input-group">
+                <label for="water-input">Change in Water Units:</label>
+                <div class="input-wrapper">
+                    <input type="number" id="water-input" placeholder="(e.g. -50, +20)" autofocus>
+                    <button id="update-btn">Process Month</button>
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">Current River Level</div>
+                <div class="stat-val" id="level-val">200</div>
+                <div style="font-size: 12px; color: #7f8c8d;">(Thresholds: 0 - 400)</div>
+            </div>
+
+            <div id="status-msg"></div>
+        </div>
+    </div>
+
+    <div class="graph-container">
+        <canvas id="riverChart"></canvas>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <button onclick="window.location.reload()" style="background-color: #95a5a6;">Restart Simulation</button>
+    </div>
+</div>
+
+<footer>
+    Created with ❤️ for Geography students<br>
+    Follow for updates: <a href="https://www.instagram.com/geographer.stace/" target="_blank" rel="noopener noreferrer">@geographer.stace</a>
+</footer>
+
+<script>
+    let currentLevel = 200;
+    let monthIndex = 0;
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const history = [200];
+    const labels = ["Start"];
+
+    const ctx = document.getElementById('riverChart').getContext('2d');
+    const riverChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'River Water Level (Units)',
+                data: history,
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 500,
+                    grid: {
+                        color: function(context) {
+                            if (context.tick.value === 400) return '#e74c3c';
+                            if (context.tick.value === 0) return '#f39c12';
+                            return '#ddd';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const updateBtn = document.getElementById('update-btn');
+    const waterInput = document.getElementById('water-input');
+    const waterFill = document.getElementById('water-fill');
+    const levelVal = document.getElementById('level-val');
+    const monthDisplay = document.getElementById('month-display');
+    const statusMsg = document.getElementById('status-msg');
+
+    // Action function to process the month
+    function handleProcessMonth() {
+        if (monthIndex >= 12) {
+            statusMsg.className = "";
+            statusMsg.innerText = "ℹ️ 12-month cycle complete. Please restart to run another climate scenario!";
+            statusMsg.classList.add('alert-info');
+            return;
+        }
+
+        const change = parseInt(waterInput.value) || 0;
+        currentLevel += change;
+
+        // UI Updates
+        levelVal.innerText = currentLevel;
+        
+        // Height calculation (Max visual is 400, but we allow overflow)
+        let visualHeight = (currentLevel / 400) * 100;
+        if (visualHeight < 0) visualHeight = 0;
+        if (visualHeight > 100) visualHeight = 100; // Cap visual at bank top
+        waterFill.style.height = visualHeight + "%";
+
+        // Logic Checks
+        statusMsg.className = "";
+        if (currentLevel >= 400) {
+            statusMsg.innerText = "⚠️ FLOOD ALERT! The river has exceeded its bankfull capacity (400 units). Surplus water is spreading over the floodplain.";
+            statusMsg.classList.add('alert-flood');
+            waterFill.style.backgroundColor = "#2980b9"; // Darker blue for flood
+        } else if (currentLevel <= 0) {
+            statusMsg.innerText = "🌵 DROUGHT ALERT! The river has run dry (0 units). Water deficit is extreme.";
+            statusMsg.classList.add('alert-drought');
+            waterFill.style.backgroundColor = "#d35400";
+        } else {
+            statusMsg.innerText = "Normal Flow: The river level is stable within its banks.";
+            statusMsg.classList.add('alert-normal');
+            waterFill.style.backgroundColor = "#3498db";
+        }
+
+        // Chart Updates
+        labels.push(months[monthIndex]);
+        history.push(currentLevel);
+        riverChart.update();
+
+        monthIndex++;
+        if (monthIndex < 12) {
+            monthDisplay.innerText = months[monthIndex];
+        } else {
+            monthDisplay.innerText = "Year End";
+            updateBtn.disabled = true;
+            statusMsg.innerText = "Simulation Complete. Analyze the River Regime graph below.";
+        }
+        
+        // Reset input value to empty to show placeholder again
+        waterInput.value = "";
+    }
+
+    // Process on button click
+    updateBtn.addEventListener('click', handleProcessMonth);
+
+    // Process on Enter key press
+    waterInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            handleProcessMonth();
+        }
+    });
+</script>
+
+</body>
+</html>
