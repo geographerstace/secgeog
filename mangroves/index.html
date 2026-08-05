@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mangrove Zonation & Tide Simulator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .water-layer {
+            transition: height 0.15s linear;
+        }
+        .wave-animation {
+            animation: wave 3s ease-in-out infinite alternate;
+        }
+        @keyframes wave {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-5px); }
+        }
+        .tree-group {
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+            transform-origin: bottom center;
+            transform-box: fill-box;
+        }
+        .tree-group:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 6px 10px rgba(0,0,0,0.25));
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                    <i class="fa-solid fa-water text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900">Mangrove Zonation Simulator</h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-5">
+
+        <!-- SECTION 1: EXPLORE MODE -->
+        <div id="section-explore" class="space-y-5">
+
+            <!-- Tide Controller Bar -->
+            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm space-y-3">
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <label class="text-xs font-bold text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-emerald-600"></i> Tide Level:
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <span id="current-tide-badge" class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold">
+                            Low Tide
+                        </span>
+                        <button id="btn-play-tide" onclick="toggleTideAnimation()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                            <i id="play-icon" class="fa-solid fa-play"></i>
+                            <span id="play-text">Animate 12h Cycle</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Range Slider -->
+                <div class="relative pt-1">
+                    <input type="range" id="tide-slider" min="0" max="100" value="0" oninput="updateTideLevel(this.value)" class="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                    <div class="flex justify-between text-[11px] font-semibold text-slate-600 mt-1.5">
+                        <span class="text-cyan-700">Low Tide</span>
+                        <span class="text-emerald-700">Medium Tide</span>
+                        <span class="text-blue-700">High Tide</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cross-Section Visualizer -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden relative">
+                
+                <!-- Sky Background & Indicators -->
+                <div class="h-16 bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50/20 relative flex justify-between px-5 pt-2">
+                    <div class="text-xs text-slate-500">
+                        <p class="font-bold text-slate-800">Coastal Profile</p>
+                        <p class="text-[11px]">Seaward <i class="fa-solid fa-arrow-right mx-1"></i> Inland</p>
+                    </div>
+
+                    <div class="flex gap-3 text-xs">
+                        <div class="bg-white/90 backdrop-blur px-2.5 py-1 rounded-lg border border-slate-200 text-center">
+                            <span class="block text-[10px] text-slate-500">Wave Energy</span>
+                            <span class="font-bold text-amber-700 text-[11px]">High <i class="fa-solid fa-arrow-right text-[9px] mx-0.5"></i> Low</span>
+                        </div>
+                        <div class="bg-white/90 backdrop-blur px-2.5 py-1 rounded-lg border border-slate-200 text-center">
+                            <span class="block text-[10px] text-slate-500">Soil Salinity</span>
+                            <span class="font-bold text-cyan-700 text-[11px]">High <i class="fa-solid fa-arrow-right text-[9px] mx-0.5"></i> Low</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cross-Section Canvas -->
+                <div class="relative h-72 md:h-80 w-full overflow-hidden bg-slate-50 border-t border-slate-200">
+                    
+                    <!-- Water Overlay -->
+                    <div id="water-body" class="water-layer absolute bottom-0 left-0 right-0 bg-cyan-500/25 border-t-2 border-cyan-400 z-20 pointer-events-none" style="height: 12%;">
+                        <div class="w-full h-2 bg-cyan-200/50 wave-animation"></div>
+                        <span id="water-depth-tag" class="absolute top-2 right-4 text-[10px] font-bold text-cyan-900 bg-white/90 px-2 py-0.5 rounded border border-cyan-300 shadow-sm">
+                            Water Level: Low Tide
+                        </span>
+                    </div>
+
+                    <!-- Single SVG Container for Mud, Zone Lines & Anchored Trees -->
+                    <svg class="absolute inset-0 w-full h-full z-10" preserveAspectRatio="none" viewBox="0 0 1000 300">
+                        <!-- Mud Layer -->
+                        <path d="M 0,260 Q 250,245 500,190 T 1000,100 L 1000,300 L 0,300 Z" fill="#422006" />
+                        <!-- Soil Top Line -->
+                        <path d="M 0,260 Q 250,245 500,190 T 1000,100" fill="none" stroke="#271202" stroke-width="5" />
+                        
+                        <!-- Zone Dividers -->
+                        <line x1="250" y1="0" x2="250" y2="300" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" />
+                        <line x1="500" y1="0" x2="500" y2="300" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" />
+                        <line x1="750" y1="0" x2="750" y2="300" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" />
+
+                        <!-- TREE 1: Avicennia -->
+                        <g class="tree-group" onclick="showSpeciesDetails('avicennia')">
+                            <!-- Foliage Canopy -->
+                            <ellipse cx="125" cy="82" rx="38" ry="30" fill="#059669" />
+                            <ellipse cx="125" cy="76" rx="28" ry="22" fill="#10b981" />
+                            <!-- Tall Trunk -->
+                            <rect x="121" y="102" width="8" height="153" fill="#271202" />
+                            <!-- Pencil Roots (Pneumatophores) embedded into soil at y=255 -->
+                            <g stroke="#78350f" stroke-width="3" stroke-linecap="round">
+                                <line x1="90" y1="258" x2="90" y2="232" />
+                                <line x1="100" y1="257" x2="100" y2="228" />
+                                <line x1="110" y1="256" x2="110" y2="230" />
+                                <line x1="140" y1="254" x2="140" y2="229" />
+                                <line x1="150" y1="253" x2="150" y2="226" />
+                                <line x1="160" y1="252" x2="160" y2="232" />
+                            </g>
+                        </g>
+
+                        <!-- TREE 2: Rhizophora -->
+                        <g class="tree-group" onclick="showSpeciesDetails('rhizophora')">
+                            <!-- Foliage Canopy -->
+                            <circle cx="375" cy="65" r="32" fill="#047857" />
+                            <circle cx="370" cy="60" r="22" fill="#059669" />
+                            <!-- Main Trunk -->
+                            <rect x="372" y="85" width="6" height="75" fill="#271202" />
+                            <!-- Arching Prop/Stilt Roots meeting mud line at y=220 -->
+                            <g stroke="#78350f" stroke-width="4" fill="none" stroke-linecap="round">
+                                <path d="M 373,150 Q 350,185 335,223" />
+                                <path d="M 373,160 Q 360,195 350,222" />
+                                <path d="M 377,150 Q 400,185 415,220" />
+                                <path d="M 377,160 Q 390,195 400,221" />
+                            </g>
+                        </g>
+
+                        <!-- TREE 3: Bruguiera -->
+                        <g class="tree-group" onclick="showSpeciesDetails('bruguiera')">
+                            <!-- Foliage Head (Canopy) -->
+                            <ellipse cx="625" cy="60" rx="34" ry="25" fill="#065f46" />
+                            <ellipse cx="625" cy="55" rx="26" ry="18" fill="#047857" />
+                            <polygon points="625,20 595,70 655,70" fill="#059669" />
+                            <!-- Trunk extending to ground -->
+                            <rect x="621" y="75" width="8" height="95" fill="#271202" />
+                            <!-- Knee Roots rooted firmly into soil at y=170 -->
+                            <g stroke="#78350f" stroke-width="3.5" fill="none" stroke-linecap="round">
+                                <path d="M 621,165 L 600,152 L 585,173" />
+                                <path d="M 629,165 L 650,152 L 665,169" />
+                            </g>
+                        </g>
+
+                        <!-- TREE 4: Non-Mangrove Tropical Rainforest Tree -->
+                        <g class="tree-group" onclick="showSpeciesDetails('rainforest')">
+                            <!-- Tall Tropical Umbrella Canopy -->
+                            <ellipse cx="875" cy="40" rx="42" ry="26" fill="#15803d" />
+                            <ellipse cx="875" cy="33" rx="32" ry="18" fill="#22c55e" />
+                            <!-- Main Tall Trunk -->
+                            <rect x="871" y="58" width="8" height="52" fill="#271202" />
+                            <!-- Taproot & Terrestrial Roots anchored in ground at y=110 -->
+                            <g stroke="#422006" stroke-width="3.5" stroke-linecap="round">
+                                <line x1="875" y1="108" x2="875" y2="128" />
+                                <line x1="872" y1="110" x2="858" y2="117" />
+                                <line x1="878" y1="110" x2="892" y2="116" />
+                            </g>
+                        </g>
+                    </svg>
+
+                    <!-- HTML Labels Positioned Over Zones -->
+                    <div class="absolute top-2 inset-x-0 z-30 grid grid-cols-4 pointer-events-none">
+                        <div class="text-center">
+                            <span class="inline-block bg-white/90 backdrop-blur px-2 py-0.5 rounded border border-slate-200 text-[10px] font-bold text-slate-800 shadow-sm">
+                                Zone 1: Seaward
+                            </span>
+                        </div>
+                        <div class="text-center">
+                            <span class="inline-block bg-white/90 backdrop-blur px-2 py-0.5 rounded border border-slate-200 text-[10px] font-bold text-slate-800 shadow-sm">
+                                Zone 2: Middle
+                            </span>
+                        </div>
+                        <div class="text-center">
+                            <span class="inline-block bg-white/90 backdrop-blur px-2 py-0.5 rounded border border-slate-200 text-[10px] font-bold text-slate-800 shadow-sm">
+                                Zone 3: Landward
+                            </span>
+                        </div>
+                        <div class="text-center">
+                            <span class="inline-block bg-white/90 backdrop-blur px-2 py-0.5 rounded border border-slate-200 text-[10px] font-bold text-slate-800 shadow-sm">
+                                Zone 4: Inland
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SPECIES DETAILS -->
+            <div id="species-info-card" class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                <div class="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
+                    <div>
+                        <span id="detail-zone" class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Click a tree above to view details</span>
+                        <h3 id="detail-name" class="text-base font-bold text-slate-900">Avicennia (Api-Api) & Sonneratia (Perepat)</h3>
+                    </div>
+                    <div id="detail-badge" class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5">
+                        <i class="fa-solid fa-water"></i> Submerged Twice Daily
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                    <!-- Root Adaptation -->
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <div class="flex items-center space-x-1.5 text-emerald-700 font-bold text-xs uppercase mb-1">
+                            <i class="fa-solid fa-plant-wilt"></i>
+                            <span>Root Adaptation</span>
+                        </div>
+                        <h4 id="detail-root-title" class="font-bold text-slate-900 text-xs mb-1">Pencil Roots (Pneumatophores)</h4>
+                        <p id="detail-root-desc" class="text-xs text-slate-600 leading-relaxed">
+                            Vertical breathing roots stick up above waterlogged mud to absorb air oxygen during low tide.
+                        </p>
+                    </div>
+
+                    <!-- Environment -->
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <div class="flex items-center space-x-1.5 text-cyan-700 font-bold text-xs uppercase mb-1">
+                            <i class="fa-solid fa-water"></i>
+                            <span>Environment</span>
+                        </div>
+                        <h4 id="detail-env-title" class="font-bold text-slate-900 text-xs mb-1">High Salinity & Wave Energy</h4>
+                        <p id="detail-env-desc" class="text-xs text-slate-600 leading-relaxed">
+                            Flooded twice daily by high tides. Excretes salt through leaf glands.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Custom Student Footer -->
+    <footer style="margin-top: 30px; text-align: center; color: #7f8c8d; font-size: 14px; border-top: 1px solid #eee; padding-top: 20px; padding-bottom: 20px;">
+        <p style="margin: 5px 0;">Created with ❤️ for Geography students</p>
+        <p style="margin: 5px 0;">Follow for updates: <a href="https://www.instagram.com/geographer.stace/" target="_blank" style="color: #059669; text-decoration: none; font-weight: bold; transition: color 0.2s;">@geographer.stace</a></p>
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        const speciesData = {
+            avicennia: {
+                name: "Avicennia (Api-Api) & Sonneratia (Perepat)",
+                zone: "Zone 1: Seaward Zone (Low Intertidal)",
+                badge: "Submerged Twice Daily",
+                rootTitle: "Pencil Roots (Pneumatophores)",
+                rootDesc: "Vertical breathing roots stick up out of waterlogged mud to take in oxygen during low tide.",
+                envTitle: "High Salinity & Wave Energy",
+                envDesc: "Flooded twice daily. Excretes salt through leaf glands."
+            },
+            rhizophora: {
+                name: "Rhizophora (Bakau)",
+                zone: "Zone 2: Middle Zone (Mid Intertidal)",
+                badge: "Flooded Regular High Tides",
+                rootTitle: "Stilt / Prop Roots",
+                rootDesc: "Arching prop roots anchor trees firmly in deep, unstable mud.",
+                envTitle: "Moderate Salinity & Wave Energy",
+                envDesc: "Flooded during high tide. Excludes salt at root membranes."
+            },
+            bruguiera: {
+                name: "Bruguiera (Tumu)",
+                zone: "Zone 3: Landward Zone (High Intertidal)",
+                badge: "Flooded High Tides Only",
+                rootTitle: "Knee Roots",
+                rootDesc: "Looping roots emerge from mud to absorb air during dry periods.",
+                envTitle: "Lower Salinity, Firmer Soil",
+                envDesc: "Flooded mainly during high tides. Requires well-aerated soil between tides."
+            },
+            rainforest: {
+                name: "Tropical Rainforest Tree (e.g. Shorea / Dipterocarp)",
+                zone: "Zone 4: Inland Margin (Non-Mangrove Vegetation)",
+                badge: "Never Flooded by Tides",
+                rootTitle: "Standard Terrestrial Roots",
+                rootDesc: "Deep taproots and lateral roots designed for dry, well-drained terrestrial soil.",
+                envTitle: "Freshwater & Zero Tidal Flooding",
+                envDesc: "Cannot tolerate salty soil or saltwater submergence. Marks the end of the coastal mangrove zone."
+            }
+        };
+
+        function updateTideLevel(val) {
+            const waterBody = document.getElementById('water-body');
+            const depthTag = document.getElementById('water-depth-tag');
+            const tideBadge = document.getElementById('current-tide-badge');
+
+            // Continuous height calculation from 12% (low tide) to 62% (high tide)
+            const heightPercent = 12 + (val * 0.5);
+            waterBody.style.height = heightPercent + '%';
+
+            if (val < 33) {
+                tideBadge.innerText = "Low Tide";
+                depthTag.innerText = "Water Level: Low Tide (Roots exposed)";
+            } else if (val < 67) {
+                tideBadge.innerText = "Medium Tide";
+                depthTag.innerText = "Water Level: Medium Tide (Seaward zone roots submerged)";
+            } else {
+                tideBadge.innerText = "High Tide";
+                depthTag.innerText = "Water Level: High Tide (Seaward & Middle trunks submerged)";
+            }
+        }
+
+        let animationTimer = null;
+        let isAnimating = false;
+
+        function toggleTideAnimation() {
+            const btnText = document.getElementById('play-text');
+            const btnIcon = document.getElementById('play-icon');
+            const slider = document.getElementById('tide-slider');
+
+            if (isAnimating) {
+                clearInterval(animationTimer);
+                isAnimating = false;
+                btnText.innerText = "Animate 12h Cycle";
+                btnIcon.className = "fa-solid fa-play";
+            } else {
+                isAnimating = true;
+                btnText.innerText = "Pause";
+                btnIcon.className = "fa-solid fa-pause";
+
+                let goingUp = true;
+                animationTimer = setInterval(() => {
+                    let currentVal = parseFloat(slider.value);
+                    if (goingUp) {
+                        currentVal += 1;
+                        if (currentVal >= 100) {
+                            currentVal = 100;
+                            goingUp = false;
+                        }
+                    } else {
+                        currentVal -= 1;
+                        if (currentVal <= 0) {
+                            currentVal = 0;
+                            goingUp = true;
+                        }
+                    }
+                    slider.value = currentVal;
+                    updateTideLevel(currentVal);
+                }, 30);
+            }
+        }
+
+        function showSpeciesDetails(key) {
+            const data = speciesData[key];
+            if (!data) return;
+
+            document.getElementById('detail-zone').innerText = data.zone;
+            document.getElementById('detail-name').innerText = data.name;
+            document.getElementById('detail-badge').innerHTML = `<i class="fa-solid fa-water"></i> ${data.badge}`;
+            
+            document.getElementById('detail-root-title').innerText = data.rootTitle;
+            document.getElementById('detail-root-desc').innerText = data.rootDesc;
+
+            document.getElementById('detail-env-title').innerText = data.envTitle;
+            document.getElementById('detail-env-desc').innerText = data.envDesc;
+
+            const card = document.getElementById('species-info-card');
+            card.classList.add('ring-2', 'ring-emerald-500');
+            setTimeout(() => card.classList.remove('ring-2', 'ring-emerald-500'), 1000);
+        }
+
+        window.onload = function() {
+            updateTideLevel(0);
+        };
+    </script>
+</body>
+</html>
